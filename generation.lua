@@ -1,3 +1,57 @@
+-- Services
+local ServerStorage = game:GetService("ServerStorage")
+	local Configuration = ServerStorage:WaitForChild("Configuration")
+	local Events = ServerStorage:WaitForChild("Events")
+		local Reload = Events:WaitForChild("Reload")
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local Dictionaries = ReplicatedStorage:WaitForChild("Dictionaries")
+		local BlockDict = require(Dictionaries:WaitForChild("Block"))
+
+local RunService = game:GetService("RunService")
+
+-- Variables
+local ores = {
+	["Coal"] = BlockDict.blocks.CoalOre
+}
+
+local oreData = {
+	["Coal"] = {
+		["density"] = .15,
+		["minVein"] = 2,
+		["maxVein"] = 4
+	}
+}
+
+local loadedOres = {}
+
+local blockTable = BlockDict.blocks
+
+local Parts = workspace:WaitForChild("Parts")
+
+-- CONFIG
+local X = Configuration:WaitForChild("X").Value
+local Z = Configuration:WaitForChild("Z").Value
+
+local PartSize = Configuration:WaitForChild("PartSize").Value
+
+local intensity = Configuration:WaitForChild("intensity").Value
+local bottomPos = Configuration:WaitForChild("bottomPos").Value
+local origin_pos = Configuration:WaitForChild("origin_pos").Value
+local tree_density = Configuration:WaitForChild("tree_density").Value
+local tree_min_height = Configuration:WaitForChild("tree_min_height").Value
+local tree_max_height = Configuration:WaitForChild("tree_max_height").Value
+local tree_distance = Configuration:WaitForChild("tree_distance").Value
+
+local grid = {}
+local structures = {
+	Trees = {},
+	Ores = {}
+}
+local stones = {}
+
+local isLoading = false
+
 local function getBlockFromPos(pos:Vector3)
 	local b = nil
 	for _,block:Model in ipairs(Parts:GetChildren()) do
@@ -20,8 +74,8 @@ local function replaceBlock(blockA:Model,blockB:Model)
 end
 
 local function trees()
-  -- Simple tree generation
-
+	-- Simple tree generation
+	
 	for x=1, X do
 		for z=1, Z do
 			local xPos = origin_pos.X+(x*PartSize)
@@ -121,7 +175,7 @@ local function trees()
 end
 
 local function generateOres()
-  -- Generate ores in veins 
+	-- Generating ores in veins of 1,2 or 3 etc.
 	local cords = {"X","Y","Z"}
 	
 	for _,stone:Model in ipairs(stones) do
@@ -176,6 +230,7 @@ local function generateOres()
 end
 
 local function colorPart(pos:Vector3)
+	-- Repainting the part depending on their height
 	if ((pos.Y)>(bottomPos*.15)) then
 		local block = blockTable.Dirt.object:Clone()
 		block.Parent = Parts
@@ -239,6 +294,7 @@ local function generate(_seed)
 				task.wait(1)
 				
 				repeat
+					-- Generate blocks until it hits the "bedrock" position
 					local waitTime = 1
 					
 					currY = currY-PartSize
@@ -274,7 +330,6 @@ local function generate(_seed)
 	print("BLOCKS:",totalBlocks)
 	print("TIME TOOK:",tick()-startTime)
 	print("GRID (X-Z):",tostring(X).."x"..tostring(Z))
-	print(loadedOres)
 	
 	isLoading = false
 end
